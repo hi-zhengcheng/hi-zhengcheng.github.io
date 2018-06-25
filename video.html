@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="static/css/bootstrap.min.css">
+<script src="static/js/jquery-3.3.1.slim.min.js"></script>
+<script src="static/js/popper.min.js"></script>
+<script src="static/js/bootstrap.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<style>
+video {
+  width: 98%;
+  height: auto;
+}
+</style>
+<script type="text/javascript">
+
+$(document).ready(function(){
+    var frame_video = document.getElementById("frame_video");
+    var depth_video = document.getElementById("depth_video");
+
+    $('#play_btn').on('click', function (e) {
+        frame_video.play();
+        depth_video.play();
+    });
+
+    $('#pause_btn').on('click', function (e) {
+        frame_video.pause();
+        depth_video.pause();
+    });
+
+
+    $('#reset_btn').on('click', function (e) {
+        frame_video.pause();
+        frame_video.currentTime = 0;
+        frame_video.play();
+
+        depth_video.pause();
+        depth_video.currentTime = 0;
+        depth_video.play();
+    });
+});
+</script>
+</head>
+<body>
+
+
+<div class="container mt-3">
+<div class="card-group">
+  <div class="card text-white bg-dark">
+    <div class="card-body">
+      <center><h5 class="card-title">Frame</h5></center>
+      <p class="card-text"></p>
+    </div>
+    <video class="ml-2" width="400" id="frame_video" loop="loop" controls>
+      <source src="http://127.0.0.1:5000/static/cvpr2018/g1_g2_frame_us.mov" type="video/mp4">
+    </video>
+  </div>
+  <div class="card text-white bg-dark">
+    <div class="card-body">
+      <center><h5 class="card-title">Depth</h5></center>
+    </div>
+
+    <video class="ml-1" width="400" id="depth_video" loop="loop" controls>
+      <source src="http://127.0.0.1:5000/static/cvpr2018/g1_g2_depth_us.mov" type="video/mp4">
+    </video>
+  </div>
+</div>
+
+<button type="button" class="btn btn-primary btn-lg btn-block mt-3" id="play_btn">play</button>
+<button type="button" class="btn btn-secondary btn-lg btn-block" id="pause_btn">pause</button>
+<button type="button" class="btn btn-info btn-lg btn-block" id="reset_btn">reset</button>
+
+</div>
+</body>
+</html>
