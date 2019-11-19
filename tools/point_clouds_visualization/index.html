@@ -2,11 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!-- load jquery first!!! -->
+    <script src="js/jquery-3.4.1.js"></script>
+    <script src="js/bootstrap.min.js"></script>
     <title>Point Cloud Visualization</title>
     <style>
         body {
             margin: 0;
-            background-color: #ccc;
         }
 
         canvas {
@@ -14,26 +18,28 @@
             height: 100%;
         }
     </style>
-</head>
-<body>
+
     <script src="js/three.js"></script>
     <script src="js/TrackballControls.js"></script>
     <script>
+
+        // ----- for three js render
         var config = {
-            color: 0xff0000,
+            bg_color: 0x000000,
             material: new THREE.MeshBasicMaterial({color: 0x4169E1}), // default color
         };
 
         var camera, scene, renderer, controls;
+        var current_points, current_container;
 
         function randFloat(low, high) {
             return low + Math.random() * (high - low);
         }
 
-        function init(points) {
+        function init(points, container) {
             var aspect = window.innerWidth / window.innerHeight;
             camera = new THREE.PerspectiveCamera(60, aspect);
-            camera.position.z = 30;
+            camera.position.z = 50;
 
             scene = new THREE.Scene();
 
@@ -48,8 +54,10 @@
 
             renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(config.bg_color);
 
-            document.body.appendChild(renderer.domElement);
+            container.empty();
+            container.append(renderer.domElement);
         }
 
         function createControls() {
@@ -82,16 +90,20 @@
             }
         });
 
-        function showPointCloud(points) {
+        function showPointCloud(points, container) {
             // too many points may cause memory crash
-            // points = points.slice(0, 2000);
-            init(points);
+            points = points.slice(0, 4000);
+
+            current_points = points;
+            current_container = container;
+
+            init(points, container);
             createControls();
             render();
             animate();
         }
 
-        // --------------------------
+        // --------- for file uploader
 
         function parse_line(line_text) {
             if (!line_text) {
@@ -144,18 +156,132 @@
                     points.push(parse_line_result);
                 }
 
-                document.body.innerHTML = "";
-                showPointCloud(points);
+                $('#upload_file_container').hide();
+                $('#render_div').show();
+
+                showPointCloud(points, $('#render_div'));
             };
             reader.readAsText(f);
         }
 
-        document.addEventListener("DOMContentLoaded", function(){
-            var file_input = document.getElementById("point_cloud_file");
+        // ---- for option panel
+
+        function save_config() {
+            var updated = false;
+
+            const background_color = $("#bg_color").val();
+            try {
+                const bg_color = parseInt(background_color);
+                config.bg_color = bg_color;
+                updated = true;
+            }
+            catch (error) {
+                console.log('background color error!');
+            }
+
+            const point_color = $("#point_color").val();
+            try {
+                const pt_color = parseInt(point_color);
+                config.material = new THREE.MeshBasicMaterial({color: pt_color});
+                updated = true;
+            }
+            catch (error) {
+                console.log('background color error!');
+            }
+
+            if (updated) {
+                showPointCloud(current_points, current_container);
+            }
+        }
+
+
+        // ----- document ready
+        $(document).ready(function(){
+            $('#upload_file_container').show();
+            $('#render_div').hide();
+
+            const file_input = document.getElementById("point_cloud_file");
             file_input.addEventListener("change", handlerFileSelected);
+
+            $(document).on('keydown', function(event) {
+                if ($('#option_panel').is(":visible")) {
+                    return;
+                }
+
+                if (!$('#render_div').is(":visible")) {
+                    return;
+                }
+
+                const key_code = (event.keyCode ? event.keyCode : event.which);
+                if (key_code=== 79) {
+                    // o for option
+                    $('#option_panel').modal('toggle');
+                }
+            });
+
+            $('#save_config').click(function() {
+                save_config();
+            });
         });
 
     </script>
+</head>
+
+<body>
+    <div class="container mt-3" id="upload_file_container">
+        <h2>Point Cloud Visualization Tool</h2>
+        <p>File format:</p>
+        <ul>
+            <li>plain txt file</li>
+            <li>each line represent on point</li>
+            <li>"x y z" or "x,y,z" or "x, y, z" are all OK</li>
+        </ul>
+        <div class="custom-file mb-3">
+            <input type="file" class="custom-file-input" id="point_cloud_file" name="filename">
+            <label class="custom-file-label" for="point_cloud_file">Choose point cloud file</label>
+        </div>
+    </div>
+
+    <div id="render_div"></div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="option_panel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Render Options</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group row">
+                            <label class="col-sm-4 col-form-label">Background Color</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="bg_color" placeholder="0x000000">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-4 col-form-label">Point Color</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="point_color" placeholder="0x4169E1">
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="save_config" data-dismiss="modal">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
-    <input type="file" id="point_cloud_file">
+
+
+
 </html>
