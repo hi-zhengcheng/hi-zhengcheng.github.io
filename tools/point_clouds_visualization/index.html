@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Point Cloud Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #ccc;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <script src="js/three.js"></script>
+    <script src="js/TrackballControls.js"></script>
+    <script>
+        var config = {
+            color: 0xff0000,
+            material: new THREE.MeshBasicMaterial({color: 0x4169E1}), // default color
+        };
+
+        var camera, scene, renderer, controls;
+
+        function randFloat(low, high) {
+            return low + Math.random() * (high - low);
+        }
+
+        function init(points) {
+            var aspect = window.innerWidth / window.innerHeight;
+            camera = new THREE.PerspectiveCamera(60, aspect);
+            camera.position.z = 30;
+
+            scene = new THREE.Scene();
+
+            var geometry = new THREE.CubeGeometry(0.1, 0.1, 0.1, 1, 1, 2);
+            for (var i = 0; i < points.length; i++) {
+                var gi = geometry.clone();
+                gi.translate(points[i][0], points[i][1], points[i][2]);
+                var point = new THREE.Mesh(gi, config.material);
+
+                scene.add(point);
+            }
+
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            document.body.appendChild(renderer.domElement);
+        }
+
+        function createControls() {
+            controls = new THREE.TrackballControls(camera, renderer.domElement);
+
+            controls.rotateSpeed = 2.0;
+            controls.zoomSpeed = 20;
+            controls.panSpeed = 0.8;
+
+            controls.staticMoving = true;
+            controls.dynamicDampingFactor = 0.3;
+
+            controls.addEventListener('change', render);
+        }
+
+        function render() {
+            renderer.render(scene, camera);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update()
+        }
+
+        window.addEventListener('resize', function() {
+            if (camera) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+
+        function showPointCloud(points) {
+            // too many points may cause memory crash
+            // points = points.slice(0, 2000);
+            init(points);
+            createControls();
+            render();
+            animate();
+        }
+
+        // --------------------------
+
+        function parse_line(line_text) {
+            if (!line_text) {
+                return null;
+            }
+
+            var splits = [' ', ',', ', '];
+            for (var i = 0; i < splits.length; i++) {
+                var result = line_text.split(splits[i]);
+                if (result.length === 3 || result.length === 6) {
+                    for (var j = 0; j < result.length; j ++) {
+                        result[j] *= 10;
+                    }
+                    return result;
+                }
+            }
+
+            return null;
+        }
+
+        function handlerFileSelected(evt) {
+            if (!evt.target.files || ! evt.target.files[0]) {
+                alert("No file uploaded");
+                return;
+            }
+
+            var f = evt.target.files[0];
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                var contents = event.target.result;
+                var lines = contents.split('\n');
+                var parse_line_result;
+
+                // detect color information
+                var info_len = 0;
+                var first_line = lines[0];
+                parse_line_result = parse_line(first_line);
+                if (!parse_line_result) {
+                    alert('Parse Error');
+                    return;
+                }
+                info_len = parse_line_result.length;
+
+                var points = [];
+                for (var i = 0; i < lines.length; i++) {
+                    parse_line_result = parse_line(lines[i]);
+                    if (!parse_line_result || (parse_line_result.length !== info_len)) {
+                        continue;
+                    }
+                    points.push(parse_line_result);
+                }
+
+                document.body.innerHTML = "";
+                showPointCloud(points);
+            };
+            reader.readAsText(f);
+        }
+
+        document.addEventListener("DOMContentLoaded", function(){
+            var file_input = document.getElementById("point_cloud_file");
+            file_input.addEventListener("change", handlerFileSelected);
+        });
+
+    </script>
+</body>
+    <input type="file" id="point_cloud_file">
+</html>
