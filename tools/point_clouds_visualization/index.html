@@ -27,6 +27,8 @@
         var config = {
             bg_color: 0x000000,
             material: new THREE.MeshBasicMaterial({color: 0x4169E1}), // default color
+            camera_z: 5, // camera position on z index
+            point_size: 0.003, // size of each point
         };
 
         var camera, scene, renderer, controls;
@@ -39,16 +41,21 @@
         function init(points, container) {
             var aspect = window.innerWidth / window.innerHeight;
             camera = new THREE.PerspectiveCamera(60, aspect);
-            camera.position.z = 50;
+            camera.position.z = config.camera_z;
 
             scene = new THREE.Scene();
 
-            var geometry = new THREE.CubeGeometry(0.1, 0.1, 0.1, 1, 1, 1);
+            var geometry = new THREE.CubeGeometry(config.point_size, config.point_size, config.point_size, 1, 1, 1);
             for (var i = 0; i < points.length; i++) {
                 var gi = geometry.clone();
                 gi.translate(points[i][0], points[i][1], points[i][2]);
-                var point = new THREE.Mesh(gi, config.material);
+                var material = config.material;
+                if (points[i].length === 6) {
+                    material = config.material.clone();
+                    material.color = new THREE.Color(parseInt(points[i][3]), parseInt(points[i][4]), parseInt(points[i][5]));
+                }
 
+                var point = new THREE.Mesh(gi, material);
                 scene.add(point);
             }
 
@@ -92,7 +99,7 @@
 
         function showPointCloud(points, container) {
             // too many points may cause memory crash
-            points = points.slice(0, 4000);
+            points = points.slice(0, 30000);
 
             current_points = points;
             current_container = container;
@@ -115,7 +122,7 @@
                 var result = line_text.split(splits[i]);
                 if (result.length === 3 || result.length === 6) {
                     for (var j = 0; j < result.length; j ++) {
-                        result[j] *= 10;
+                        result[j] = parseFloat(result[j]);
                     }
                     return result;
                 }
@@ -156,6 +163,50 @@
                     points.push(parse_line_result);
                 }
 
+                // normalization
+                var x_max, y_max, z_max, x_min, y_min, z_min, x_sum, y_sum, z_sum, x_mean, y_mean, z_mean;
+
+                x_max = points[0][0];
+                y_max = points[0][1];
+                z_max = points[0][2];
+
+                x_min = points[0][0];
+                y_min = points[0][1];
+                z_min = points[0][2];
+
+                x_sum = 0;
+                y_sum = 0;
+                z_sum = 0;
+
+                for (var i = 0; i < points.length; i++) {
+                    if (x_max < points[i][0]) x_max = points[i][0];
+                    if (x_min > points[i][0]) x_min = points[i][0];
+                    x_sum += points[i][0];
+
+                    if (y_max < points[i][1]) y_max = points[i][1];
+                    if (y_min > points[i][1]) y_min = points[i][1];
+                    y_sum += points[i][1];
+
+                    if (z_max < points[i][2]) z_max = points[i][2];
+                    if (z_min > points[i][2]) z_min = points[i][2];
+                    z_sum += points[i][2];
+                }
+
+                x_mean = x_sum / points.length;
+                y_mean = y_sum / points.length;
+                z_mean = z_sum / points.length;
+
+                var max_distance = x_max - x_min;
+                max_distance = max_distance ? max_distance >= (y_max - y_min) : (y_max - y_min);
+                max_distance = max_distance ? max_distance >= (z_max - z_min) : (z_max - z_min);
+                max_distance = max_distance ? max_distance > 0 : 1;
+
+                for (var i = 0; i < points.length; i++) {
+                    points[i][0] = (points[i][0] - x_mean) / max_distance;
+                    points[i][1] = (points[i][1] - y_mean) / max_distance;
+                    points[i][2] = (points[i][2] - z_mean) / max_distance;
+                }
+
                 $('#upload_file_container').hide();
                 $('#render_div').show();
 
@@ -188,7 +239,27 @@
                 updated = true;
             }
             catch (error) {
-                console.log('background color error!');
+                console.log('point color error!');
+            }
+
+            const point_size = $("#point_size").val();
+            try {
+                const pt_size = parseFloat(point_size);
+                config.point_size = pt_size;
+                updated = true;
+            }
+            catch (error) {
+                console.log('point size error!');
+            }
+
+            const camera_position = $("#camera_position").val();
+            try {
+                const camera_pos = parseFloat(camera_position);
+                config.camera_z = camera_pos;
+                updated = true;
+            }
+            catch (error) {
+                console.log('camera position error!');
             }
 
             if (updated) {
@@ -239,8 +310,13 @@
         <ul>
             <li>plain txt file</li>
             <li>each line represent one point</li>
-            <li>"x y z" or "x,y,z" or "x, y, z" are all OK</li>
-            <li><a href="res/point_cloud_example1.txt" target="_blank">example1</a>, <a href="res/point_cloud_example2.txt" target="_blank">example2</a></li>
+            <li>split can be " " or "," or " ,". For example: "x y z" or "x,y,z" or "x y z r g b" are all OK</li>
+            <li>
+                point cloud file example:
+                <a href="res/vase.txt" target="_blank">vase</a>,
+                <a href="res/table.txt" target="_blank">table</a>,
+                <a href="res/chair.txt" target="_blank">chair</a>,
+            </li>
         </ul>
         <div class="custom-file mb-3">
             <input type="file" class="custom-file-input" id="point_cloud_file" name="filename">
@@ -270,9 +346,23 @@
                         </div>
 
                         <div class="form-group row">
-                            <label class="col-sm-4 col-form-label">Point Color</label>
+                            <label class="col-sm-4 col-form-label">Default Point Color</label>
                             <div class="col-sm-8">
                                 <input type="text" class="form-control" id="point_color" value="0x4169E1">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-4 col-form-label">Point Size</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="point_size" value="0.003">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-4 col-form-label">Camera z-pos</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="camera_position" value="4">
                             </div>
                         </div>
 
