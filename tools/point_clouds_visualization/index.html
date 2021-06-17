@@ -52,7 +52,7 @@
                 var material = config.material;
                 if (points[i].length === 6) {
                     material = config.material.clone();
-                    material.color = new THREE.Color(parseInt(points[i][3]), parseInt(points[i][4]), parseInt(points[i][5]));
+                    material.color = new THREE.Color(points[i][3] / 255, points[i][4] / 255, points[i][5] / 255);
                 }
 
                 var point = new THREE.Mesh(gi, material);
