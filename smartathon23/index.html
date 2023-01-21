@@ -1,265 +1,79 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-.buttonT {
-  border-radius: 4px;
-  background-color: green;
-  border: none;
-  color: #FFFFFF;
-  text-align: center;
-  font-size: 16px ;
-  padding: 14px 28px;;
-  transition: all 0.5s;
-  cursor: pointer;
-  margin: 5px;
-  text-align: center;
-  display: block;
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Landing Page With Light/Dark Mode</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <div class="big-wrapper light">
+        <img src="./img/shape.png" alt="" class="shape" />
+
+        <header>
+          <div class="container">
+            <div class="logo">
+              <img src="./img/logo.png" alt="Logo" />
+              <!-- <h3></h3> -->
+            </div>
+
+            <div class="links">
+              <ul>
+                <li><a href="#">Features</a></li>
+                <li><a href="#">About Us</a></li>
+                <li><a href="demo.html#/login" class="btn">Member Login</a></li>
+              </ul>
+            </div>
+
+            <div class="overlay"></div>
+
+            <div class="hamburger-menu">
+              <div class="bar"></div>
+            </div>
+          </div>
+        </header>
+
+        <div class="showcase-area">
+          <div class="container">
+            <div class="left">
+              <div class="big-title">
+                <h1>An Open Eye </h1>
+                <h1>For<span style="color:#7BC142;"> Green </span> Cities</h1>
+              </div>
+              <p class="text">
+              Have you spotted a pollution case? Do you wanted to help
+              fight pollution & keep our city green?
+              Great! go ahead and report it to GreenHawk.
 
 
-}
+              </p>
+              <div class="cta">
+                <a href="demo.html#/user" class="btn">Report Now</a>
+              </div>
+            </div>
 
-.buttonT span {
-  cursor: pointer;
-  position: relative;
-  transition: 0.5s;
-}
+            <div class="right">
+              <img src="./img/landing.png" alt="GreenHawk Image" class="person" />
+            </div>
+          </div>
+        </div>
 
-.buttonT span:after {
-  content: '\00bb';
-  opacity: 0;
-  top: 0;
-  transition: 0.5s;
-}
+        <div class="bottom-area">
+          <div class="container">
+            <button class="toggle-btn">
+              <i class="far fa-moon"></i>
+              <i class="far fa-sun"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
 
-.button:hover span {
-  padding-right: 25px;
-}
+    <!-- JavaScript Files -->
 
-.buttonT:hover span:after {
-  opacity: 1;
-  right: 0;
-}
-
-.btn {
-  border-radius: 4px;
-  background-color: green;
-  border: none;
-  color: white;
-  padding: 16px 32px;
-  text-align: center;
-  font-size: 16px;
-  margin: 4px 2px;
-  opacity: 0.6;
-  transition: 0.3s;
-}
-
-.btn:hover {opacity: 1}
-
-body {font-family: Arial, Helvetica, sans-serif;}
-
-/* Full-width input fields */
-input[type=text], input[type=password] {
-  width: 100%;
-  padding: 12px 20px;
-  margin: 8px 0;
-  display: inline-block;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-}
-
-/* Set a style for all buttons */
-button {
-  background-color: #04AA6D;
-  color: white;
-  padding: 14px 20px;
-  margin: 8px 0;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-}
-
-button:hover {
-  opacity: 0.8;
-}
-
-/* Extra styles for the cancel button */
-.cancelbtn {
-  width: auto;
-  padding: 10px 18px;
-  background-color: #f44336;
-}
-
-.imgcontainer {
-  text-align: center;
-  margin: 24px 0 12px 0;
-  position: relative;
-}
-
-img.avatar {
-  width: 40%;
-  border-radius: 50%;
-}
-
-.container {
-  padding: 16px;
-}
-
-span.psw {
-  float: right;
-  padding-top: 16px;
-}
-
-/* The Modal (background) */
-.modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-  padding-top: 60px;
-}
-
-/* Modal Content/Box */
-.modal-content {
-  background-color: #fefefe;
-  margin: 5% auto 15% auto; /* 5% from the top, 15% from the bottom and centered */
-  border: 1px solid #888;
-  width: 80%; /* Could be more or less, depending on screen size */
-}
-
-/* The Close Button (x) */
-.close {
-  position: absolute;
-  right: 25px;
-  top: 0;
-  color: #000;
-  font-size: 35px;
-  font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-  color: red;
-  cursor: pointer;
-}
-
-/* Add Zoom Animation */
-.animate {
-  -webkit-animation: animatezoom 0.6s;
-  animation: animatezoom 0.6s
-}
-
-@-webkit-keyframes animatezoom {
-  from {-webkit-transform: scale(0)}
-  to {-webkit-transform: scale(1)}
-}
-
-@keyframes animatezoom {
-  from {transform: scale(0)}
-  to {transform: scale(1)}
-}
-
-/* Change styles for span and cancel button on extra small screens */
-@media screen and (max-width: 300px) {
-  span.psw {
-     display: block;
-     float: none;
-  }
-  .cancelbtn {
-     width: 100%;
-  }
-}
-
-</style>
-<title>Smartathon23</title>
-</head>
-<body>
-
-<div style="margin: auto;">
-
-<h2> Welcome to GreenHawk! </h2>
-
-<h4> You spotted a pollution case? </h4>
-
-<!-- <p> Go ahead! help us fix it up by reporting to GreenHawk.. </p> -->
-
-<a href="./demo.html#user" style="text-decoration: none;"> <button class="buttonT"><span> Report Now</span></button>
-
-<!--
-
-Instead of starting a report by directly redirecting to the "images and retake page " it is better if we have two options(buttons):
-
-1- "Use sample image": redirects to the page with three images you used before but we need to replace "retake" with "Try another image"
-+ "send to operator" should display a page or popup with this message: "Thank you for helping us keep our city green! Stay safe and green" message with a "Go to homepage" button
-
-
-2- Take an image:  a popup message will appear "Sorry this feature is not working yet for this demo. You can try one of the example images taken by inspection vehicles"
-
--->
-
-</a>
-
-</div>
-
-<div style="margin: auto;">
-
-<p> Are you a GreenHawk responder?<p>
-
-
-<!-- the login button should show to different options that are " worker" and "operator" and redirect accordingly -->
-
-<button onclick="document.getElementById('id01').style.display='block'" class="btn">Login</button>
-
-<div id="id01" class="modal">
-
-  <div class="modal-content animate">
-
-    <div class="container">
-         <h4> I am .. </h4>
-      <a href="./demo.html#operator"><button>Operator</button></a>
-<!-- -if the operator pressed "false report" the report should be hidden with a popup message "Report marked as a false alarm. Thank you for confirmation"
-     -if the operator pressed "send to workers" the report should be hidden with a popup message "Report sent to workers for handling it. Thank you for confirmation"
--->
-
-      <a href="./demo.html#worker"><button>Worker</button></a>
-      <!-- -if the worker pressed "false report" the report should be hidden with a popup message "Report marked as a false alarm. Thank you for confirmation"
-     -if the worker pressed "send to workers" the report should be hidden with a popup message "Report status updated to "workers"fixed". Thank you for collaboration"
-     - if all items are hidden, display " All pollution reports were handled. New reports will appear here"
--->
-
-    </div>
-
-    <div class="container" style="background-color:#f1f1f1">
-      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// Get the modal
-var modal = document.getElementById('id01');
-
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
-}
-</script>
-
-
-
-</div>
-
-
-
-
-</body>
+    <script src="https://kit.fontawesome.com/a81368914c.js"></script>
+    <script src="./app.js"></script>
+  </body>
 </html>
